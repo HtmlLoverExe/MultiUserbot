@@ -4,7 +4,7 @@ You can use this userbot to automate a lot of things.
 # Getting started
 - Download python3
 - Clone this repository
-> https://github.com/GodSaveTheDoge/MultiUserbot.git
+> git clone https://github.com/GodSaveTheDoge/MultiUserbot.git
 - Change Directory
 > cd MultiUserbot
 - Install the dependencies
@@ -16,3 +16,7 @@ You can use this userbot to automate a lot of things.
 > python MultiUserbot.py
 - If it's the first time your run it, it will ask for your phone number and other stuff to login to telegram.
 - You may need to use /commands on a random chat to see which commands are avaiable.
+
+# Changelog
+- Added /wikipedia, /iplog and /show
+- In the future I'll rewrite it as it's pretty messy.

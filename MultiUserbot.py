@@ -121,7 +121,7 @@ def commands_command(c, msg):
                   "/info - in reply, shows user info\n"
                   "/leave - in a group or channel, leaves the chat\n"
                   "/chatinfo - shows infos about the chat\n"
-                  "/paste - in reply, posts the message text on del.dog\n"
+                  "/paste - in reply, posts the message text on psty.io\n"
                   "/short - in reply, looks for links and make them shorter\n"
                   "/download - in reply, downloads medias from a message (photos, documents...)\n"
                   "/save - in reply, saves the replied message in saved messages.\n"
@@ -129,6 +129,9 @@ def commands_command(c, msg):
                   "/flood amount text - send amount times text.\n"
                   "/setfloodtimeout time - sets the timeout of /flood at time seconds. (default to 1)\n"
                   "/wikipedia lang page - parses the specified page. (lang = it/en...)\n"
+                  "/git - shows the bot repository on github\n"
+                  "/iplog url - create a redirecting url that logs the ip addresses of the ones that visit that site\n"
+                  "/show text - slowly edit the message to show the text"
                   "\n"
                   "Prefixes: . / ! #")
 
@@ -219,7 +222,8 @@ def chat_info_command(c, msg):
         f"{Emoji.JAPANESE_SYMBOL_FOR_BEGINNER} Type: <code>{tchat.type}</code>\n"
         f"{Emoji.LINK} Username: <code>{tchat.username}</code>\n" +
         f"".join([f"{Emoji.TRIDENT_EMBLEM} Bio: <code>{tchat.description}</code>\n" if tchat.description else ""]) +
-        f"")
+        f""
+                       )
     else:
         msg.edit(
             f"{Emoji.INFORMATION} Chat Info {Emoji.INFORMATION}\n\n" +
@@ -251,7 +255,7 @@ def paste_command(c, msg):
                                                     f"{Emoji.TIMER_CLOCK} Time Needed: {round(float(time.time()) - float(stime), 6)}"); return 1
     msg.edit_text(f"{Emoji.GLOBE_WITH_MERIDIANS} PASTE {Emoji.GLOBE_WITH_MERIDIANS}\n"
                   f"\n"
-                  f"{Emoji.LINK} Url: {requests.post('https://psty.io/upload', data={'lang':'markdown', 'code':msg.reply_to_message.text.markdown}).url}\n"
+                  f"{Emoji.LINK} Url: {requests.post('https://psty.io/upload', data={'lang': 'markdown', 'code': msg.reply_to_message.text.markdown}).url}\n"
                   f"{Emoji.INPUT_LATIN_UPPERCASE} Text: {msg.reply_to_message.text[0:100]}...\n"
                   f"\n"
                   f"{Emoji.TIMER_CLOCK} Time Needed: {round(float(time.time()) - float(stime), 6)}",
@@ -425,12 +429,13 @@ def google_command(c, msg):
                   f"\n"
                   f"{Emoji.HEAVY_MINUS_SIGN} Search: http://www.google.com/search?q={query}\n")
 
+
 def get_page(text, langcode):
     add = ""
     res = requests.get('https://{}.wikipedia.org/wiki/'.format(langcode) + ' '.join(text.split()))
 
     res.raise_for_status()
-    wiki = bs4.BeautifulSoup(res.text,"lxml")
+    wiki = bs4.BeautifulSoup(res.text, "lxml")
     elems = wiki.select('p')
     for i in range(4):
         add = add + (elems[i].getText())
@@ -454,9 +459,73 @@ def wikipedia_command(c, msg):
         msg.edit_text(tmp)
 
 
+@bot.on_message(Filters.user("self") & Filters.command("git", prefixes=["!", ".", "/", "#"]))
+def git_command(c, msg):
+    msg.edit_text(f"{Emoji.INBOX_TRAY} Git {Emoji.INBOX_TRAY}\n"
+                  f"\n"
+                  f"{Emoji.HEAVY_MINUS_SIGN} <a href=\"https://github.com/GodSaveTheDoge/MultiUserbot\">Multi Userbot</a>")
 
 
-@bot.on_message(Filters.private & ~Filters.user("self"))
+@bot.on_message(Filters.user("self") & Filters.command("iplog", prefixes=["!", ".", "/", "#"]))
+def iplog_command(c, msg):
+    stime = time.time()
+    if len(msg.command) < 2:
+        msg.edit_text(
+            f"{Emoji.LINK} Shortener {Emoji.LINK}\n"
+            f"\n"
+            f"{Emoji.CROSS_MARK} Error: No links found.\n"
+            f"\n"
+            f"{Emoji.TIMER_CLOCK} Time Needed: {round(float(time.time()) - float(stime), 6)}")
+        bot.send_message("self", "Incorrect Sintax!\n<code>/iplog https://www.google.com</code>")
+        return 0
+    msg.edit_text(f"{Emoji.LINK} Shortener {Emoji.LINK}\n"
+                  f"\n"
+                  f"{Emoji.GLOBE_WITH_MERIDIANS} Results:\n"
+                  f"{Emoji.HEAVY_MINUS_SIGN} Generating...\n\n"
+                  f"{Emoji.TIMER_CLOCK} Time Needed: {round(float(time.time()) - float(stime), 6)}")
+    orgUrl = "".join(msg.command[1:])
+    acsCode = requests.post("https://blasze.com/submit", data={"url": orgUrl}).json()["accessCode"]
+    logUrl = bs4.BeautifulSoup(requests.get("https://blasze.com/track/{}".format(acsCode)).text, "lxml").select(
+        "tr:nth-child(4) > td:nth-child(2)")[0].text
+    shortUrl = \
+        bs4.BeautifulSoup(requests.post("https://www.shorturl.at/shortener.php", data={"u": logUrl}).text,
+                          "lxml").select(
+            "#shortenurl")[0].get_attribute_list("value")[0]
+    msg.edit_text(f"{Emoji.LINK} Shortener {Emoji.LINK}\n"
+                  f"\n"
+                  f"{Emoji.GLOBE_WITH_MERIDIANS} Results:\n"
+                  f"{Emoji.HEAVY_MINUS_SIGN} <a href=\"https://{shortUrl}\">{orgUrl}</a>\n"
+                  f"{Emoji.HEAVY_CHECK_MARK} https://{shortUrl}\n"
+                  f"\n"
+                  f"{Emoji.TIMER_CLOCK} Time Needed: {round(float(time.time()) - float(stime), 6)}",
+                  disable_web_page_preview=True)
+    time.sleep(0.3)
+    bot.send_message("self",
+                     f"{Emoji.LINK} Ip log {Emoji.LINK}\n"
+                     f"\n"
+                     f"{Emoji.GLOBE_WITH_MERIDIANS} Results:\n"
+                     f"{Emoji.HEAVY_MINUS_SIGN} {orgUrl}\n"
+                     f"{Emoji.HEAVY_MINUS_SIGN} {logUrl}\n"
+                     f"{Emoji.HEAVY_MINUS_SIGN} {shortUrl}\n"
+                     f"{Emoji.HEAVY_CHECK_MARK} {'https://blasze.com/track/{}'.format(acsCode)}\n"
+                     f"\n"
+                     f"{Emoji.TIMER_CLOCK} Time Needed: {round(float(time.time()) - float(stime), 6)}",
+                     disable_web_page_preview=True)
+
+
+@bot.on_message(Filters.user("self") & Filters.command("show", prefixes=["!", "/", ".", "#"]))
+def show_command(c, msg):
+    if len(msg.command) < 2:
+        msg.edit_text("What should I send?\n<code>/show my text</code>")
+    tosend = " ".join(msg.command[1:])
+    for i in range(len(tosend)):
+        if tosend[i] == " ":
+            time.sleep(0.5)
+            continue
+        msg.edit_text(tosend[:i+1])
+        time.sleep(0.3)
+
+
 def on_private_afk_message(c, msg):
     if not msg.from_user.id in accepted_users:
         if afk:
