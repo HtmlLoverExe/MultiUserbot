@@ -525,7 +525,7 @@ def show_command(c, msg):
         msg.edit_text(tosend[:i+1])
         time.sleep(0.3)
 
-
+@bot.on_message(Filters.private & ~Filters.user("self"))
 def on_private_afk_message(c, msg):
     if not msg.from_user.id in accepted_users:
         if afk:
