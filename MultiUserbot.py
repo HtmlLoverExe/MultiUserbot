@@ -131,7 +131,8 @@ def commands_command(c, msg):
                   "/wikipedia lang page - parses the specified page. (lang = it/en...)\n"
                   "/git - shows the bot repository on github\n"
                   "/iplog url - create a redirecting url that logs the ip addresses of the ones that visit that site\n"
-                  "/show text - slowly edit the message to show the text"
+                  "/show text - slowly edit the message to show the text\n"
+                  "/police - in reply (or not)\n"
                   "\n"
                   "Prefixes: . / ! #")
 
@@ -145,7 +146,8 @@ def info_command(c, msg):
                       f"{Emoji.BLOND_HAIRED_MAN_LIGHT_SKIN_TONE} Name: `{msg.reply_to_message.from_user.first_name}`\n"
                       f"{Emoji.BUST_IN_SILHOUETTE} Last Name: `{msg.reply_to_message.from_user.last_name}`\n"
                       f"{Emoji.LINK} Username: `{msg.reply_to_message.from_user.username}`\n" +
-                      (f"{Emoji.TRIDENT_EMBLEM} Bio: `{user_chat.description}`\n" if user_chat.description else "") +
+                      (
+                          f"{Emoji.TRIDENT_EMBLEM} Bio: `{user_chat.description.replace('.', '[dot]')}`\n" if user_chat.description else "") +
                       (
                           f"{Emoji.DESKTOP_COMPUTER} Dc: `{msg.reply_to_message.from_user.dc_id}`\n" if msg.reply_to_message.from_user.dc_id else f"{Emoji.DESKTOP_COMPUTER} Dc: `Unknown`\n") +
                       (f"{Emoji.TRIDENT_EMBLEM} Status: `{msg.reply_to_message.from_user.status}`\n" +
@@ -170,7 +172,7 @@ def info_command(c, msg):
                            f"{Emoji.BUST_IN_SILHOUETTE} Last Name: `{msg.reply_to_message.from_user.last_name}`\n"
                            f"{Emoji.LINK} Username: `{msg.reply_to_message.from_user.username}`\n" +
                            (
-                               f"{Emoji.TRIDENT_EMBLEM} Bio: `{user_chat.description}`\n" if user_chat.description else "") +
+                               f"{Emoji.TRIDENT_EMBLEM} Bio: `{user_chat.description.replace('.', '[dot]')}`\n" if user_chat.description else "") +
                            (
                                f"{Emoji.DESKTOP_COMPUTER} Dc: `{msg.reply_to_message.from_user.dc_id}`\n" if msg.reply_to_message.from_user.dc_id else f"{Emoji.DESKTOP_COMPUTER} Dc: `Unknown`\n") +
                            (f"{Emoji.TRIDENT_EMBLEM} Status: `{msg.reply_to_message.from_user.status}`\n" +
@@ -221,7 +223,8 @@ def chat_info_command(c, msg):
         f"{Emoji.ID_BUTTON} Id: <code>{tchat.id}</code>\n"
         f"{Emoji.JAPANESE_SYMBOL_FOR_BEGINNER} Type: <code>{tchat.type}</code>\n"
         f"{Emoji.LINK} Username: <code>{tchat.username}</code>\n" +
-        f"".join([f"{Emoji.TRIDENT_EMBLEM} Bio: <code>{tchat.description}</code>\n" if tchat.description else ""]) +
+        f"".join([
+                     f"{Emoji.TRIDENT_EMBLEM} Bio: <code>{tchat.description.replace('.', '[dot]')}</code>\n" if tchat.description else ""]) +
         f""
                        )
     else:
@@ -234,7 +237,8 @@ def chat_info_command(c, msg):
             f"{Emoji.ID_BUTTON} Id: <code>{tchat.id}</code>\n"
             f"{Emoji.JAPANESE_SYMBOL_FOR_BEGINNER} Type: <code>{tchat.type}</code>\n"
             f"{Emoji.LINK} Username: <code>{tchat.username}</code>\n" +
-            f"".join([f"{Emoji.TRIDENT_EMBLEM} Bio: <code>{tchat.description}</code>\n" if tchat.description else ""]) +
+            f"".join([
+                         f"{Emoji.TRIDENT_EMBLEM} Bio: <code>{tchat.description.replace('.', '[dot]')}</code>\n" if tchat.description else ""]) +
             f"")
 
 
@@ -522,8 +526,41 @@ def show_command(c, msg):
         if tosend[i] == " ":
             time.sleep(0.5)
             continue
-        msg.edit_text(tosend[:i+1])
+        msg.edit_text(tosend[:i + 1])
         time.sleep(0.3)
+
+
+@bot.on_message(Filters.user("self") & Filters.command("police", prefixes=["!", "/", ".", "#"]))
+def police_command(c, msg):
+    on = f"{Emoji.RED_CIRCLE * 3}{Emoji.BLUE_CIRCLE * 3}\n" * 3
+    off = f"{Emoji.BLUE_CIRCLE * 3}{Emoji.RED_CIRCLE * 3}\n" * 3
+    cnt = 0
+    spc = 19
+    for i in range(spc):
+        if cnt % 2 == 0:
+            msg.edit_text(
+                on + "\n" +
+                Emoji.DERELICT_HOUSE + " " * (spc - cnt) + Emoji.POLICE_CAR + " " * cnt + Emoji.DEPARTMENT_STORE
+            )
+        else:
+            msg.edit_text(
+                off + "\n" +
+                Emoji.DERELICT_HOUSE + " " * (spc - cnt) + Emoji.POLICE_CAR + " " * cnt + Emoji.DEPARTMENT_STORE
+            )
+        cnt += 1
+        time.sleep(0.25)
+    if msg.reply_to_message != None:
+        msg.edit(
+            on + "\n" +
+            Emoji.POLICE_CAR_LIGHT + " <b>{} BUSTED</b> ".format(
+                msg.reply_to_message.from_user.first_name) + Emoji.POLICE_CAR_LIGHT
+        )
+    else:
+        msg.edit(
+            on + "\n" +
+            Emoji.POLICE_CAR_LIGHT + " " * 5 + "<b>BUSTED</b>" + " " * 5 + Emoji.POLICE_CAR_LIGHT
+        )
+
 
 @bot.on_message(Filters.private & ~Filters.user("self"))
 def on_private_afk_message(c, msg):
