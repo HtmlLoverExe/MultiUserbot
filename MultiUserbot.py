@@ -551,13 +551,11 @@ def police_command(c, msg):
         time.sleep(0.25)
     if msg.reply_to_message != None:
         msg.edit(
-            on + "\n" +
             Emoji.POLICE_CAR_LIGHT + " <b>{} BUSTED</b> ".format(
                 msg.reply_to_message.from_user.first_name) + Emoji.POLICE_CAR_LIGHT
         )
     else:
         msg.edit(
-            on + "\n" +
             Emoji.POLICE_CAR_LIGHT + " " * 5 + "<b>BUSTED</b>" + " " * 5 + Emoji.POLICE_CAR_LIGHT
         )
 
