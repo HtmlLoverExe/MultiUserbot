@@ -1,5 +1,6 @@
 import configparser
 import time
+import random
 
 from pyrogram import Client, Filters
 
@@ -10,8 +11,8 @@ prefixes = list(config["prefixes"].keys())
 @Client.on_message(Filters.user("self") & Filters.command("test", prefixes=prefixes))
 def test_command(c, msg):
  import random
-numcasuale=str(random.randint(0,100))
-print("You are " + numcasuale + " %gay!")
+    numcasuale=str(random.randint(0,100))
+     msg.edit_text("You are " + numcasuale + " %gay!")
 
 
 
